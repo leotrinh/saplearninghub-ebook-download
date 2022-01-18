@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Download Learning Hub Book by Leo</title>
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+        var leo = {
+            init: function() {
+                console.info("Init Screen");
+                $("#tabDown").click();
+            },
+
+            getBook: function() {
+                $('#toNewWindow').html('');
+                var sPath = "https://saplearninghub.plateau.com/icontent_e/CUSTOM_eu/sap/self-managed/ebook/$/xml/topic",
+                    sExt = ".svg";
+                var sBookCode = $("#bookcode").val(),
+                    sPage = $("#page").val() ? $("#page").val() : 1;
+
+                if (sBookCode !== "" || sPage !== "") {
+                    sPath = sPath.replace("$", sBookCode);
+                    for (var i = 1; i <= parseInt(sPage); i++) {
+                        var sFileName = i + sExt;
+                        var sUrl = sPath + sFileName;
+                        $('<image />', {
+                            src: sUrl
+                        }).appendTo("#toNewWindow");
+                    };
+                    var nTimeout = leo.calTimeout(sPage);
+                    alert("Your book will take more than " + parseInt(nTimeout) / 1000 + " second to load all page. Please wait till all page loaded and print");
+                    leo.printBook("toNewWindow", sBookCode, nTimeout);
+
+
+                } else {
+                    alert("Please input all field");
+                }
+
+            },
+            calTimeout: function(nPage) {
+                var nTime = 3000;
+                if (parseInt(nPage) >= 50 && parseInt(nPage) <= 100) {
+                    nTime = 5000;
+                } else if (parseInt(nPage) >= 100 && parseInt(nPage) <= 200) {
+                    nTime = 20000;
+                } else if (parseInt(nPage) > 200) {
+                    nTime = 30000;
+                }
+                return nTime;
+
+            },
+            printBook: function(sDivId, sBookCode, nTimeout) {
+				var params = [
+					'height='+screen.height,
+					'width='+screen.width,
+					'fullscreen=yes' // only works in IE, but here for completeness
+				].join(',');
+                var sCopy = sBookCode + " - Dowloaded by LEO - Email: tinhtd.info@gmail.com";
+                var mywindow = window.open('', 'PRINT', params);
+
+                mywindow.document.write('<html><head><title>' + sCopy + '</title>');
+                mywindow.document.write('</head><body >');
+                mywindow.document.write('<h1>Book Code: ' + sBookCode + '</h1>');
+                mywindow.document.write(document.getElementById(sDivId).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+
+                setTimeout(function() {
+                    mywindow.print();
+                }, nTimeout);
+
+
+                return true;
+            },
+            openTab: function(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            },
+            searchBook: function() {
+                var sCURL = "https://saplearninghub.plateau.com/learning/user/catalogsearch/catalogSearchDispatchAction.do?searchType=filteredSearch&keywords=$";
+                var sKeyBook = $("#keybook").val();
+                var sFURL = sCURL.replace("$", sKeyBook);
+                document.getElementsByName('searchResult')[0].src = sFURL;
+
+            }
+        };
+
+        $(document).ready(function() {
+
+            $("#getBook").click(function() {
+                leo.getBook();
+            });
+            $("#searchBook").click(function() {
+                leo.searchBook();
+            });
+            $("#tabDown").click(function(evt) {
+                leo.openTab(evt, "download");
+            });
+            $("#tabSearch").click(function(evt) {
+                leo.openTab(evt, "search");
+            });
+
+            //call screen init function
+            leo.init();
+
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        /* Style the tab */
+
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="logo">
+        <h1>
+            <i>LEO</i>
+        </h1>
+        <h4>
+            <i>
+			Download EBook from SAP Learning Hub
+            </i>
+        </h4>
+    </div>
+    <section class="stark-login">
+        <div class="tab">
+
+            <button class="tablinks" id="tabDown">Download</button>
+            <button class="tablinks" id="tabSearch">Search</button>
+        </div>
+        <div id="search" class="tabcontent">
+            <h3>
+                <i>
+            Keyword sample: UX402
+            </i>
+            </h3>
+            <input type="text" name="keybook" id="keybook" placeholder="UX402" value="UX402" style="width:40rem">
+            <button type="submit" id="searchBook" name=login>Search Book</button>
+            <div id="mainResult">
+                <iframe name="searchResult" width="100%" height="500px"></iframe>
+            </div>
+        </div>
+        <div id="download" class="tabcontent">
+            <h3>
+                <i>
+            Book Code Sample: UX402_EN_Col02_R1.3
+            </i>
+            </h3>
+            <h5>
+                <i>
+			<font color="red">
+			Please review book on new tab, after few second click back to this tab. Then dialog print  book to PDF will display automatic, click Save to export book to PDF.
+			</font>
+			</i>
+            </h5>
+            <input type="text" name="bookcode" id="bookcode" placeholder="Code: UX402_EN_Col02_R1.3" value="UX402_EN_Col03_R1.3" style="width:20rem">
+            <input type="text" name="page" id="page" placeholder="Total Page" value="10" style="width:20rem">
+            <button type="submit" id="getBook" name=login>Get Book</button>
+        </div>
+    </section>
+    <div id="toNewWindow"></div>
+</body>
+
+</html>
